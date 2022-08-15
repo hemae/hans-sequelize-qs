@@ -1,6 +1,6 @@
 {
   "name": "hans-sequelize-qs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Query string creator for hans-sequelize-api (frontend side)",
   "main": "lib/index.js",
   "scripts": {

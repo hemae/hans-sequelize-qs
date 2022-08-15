@@ -50,7 +50,7 @@ export type AllowedMethod =
     | StringMethod
     | MatchMethod
 
-export type QueryKind = {[key: string]: any}
+export type Filters = {[key: string]: any}
 
 export type Relations = string | string[]
 
@@ -58,16 +58,22 @@ export type Fields = string[]
 
 export type RelationFields = Record<string, string[]>
 
+export type RelationSort = Record<string, string>
+
 export type Pagination = {
     page?: number
     pageSize?: number
 }
 
+export type RelationFilters = Record<string, Filters>
+
 export type QueryObject = {
-    filters?: QueryKind
+    filters?: Filters
     relations?: Relations
     fields?: Fields
     relationFields?: RelationFields
+    relationFilters?: RelationFilters
+    relationSort?: RelationSort
     pagination?: Pagination
     sort?: string
 }

@@ -1,19 +1,22 @@
 import {
     Fields,
     Pagination,
-    QueryKind,
+    Filters,
     QueryObject,
     QueryString,
     QueryStringItem,
-    RelationFields,
-    Relations
+    RelationFields, RelationFilters,
+    Relations, RelationSort
 } from './types'
 
 
 export * from './types'
 
-function getQsFilters(filters: QueryKind): QueryStringItem[] {
+function getQsFilters(filters: Filters, isRelation: boolean = false): QueryStringItem[] {
     let queryStrings: QueryStringItem[] = []
+
+    const filtersLabel = isRelation ? 'relationFilters' : 'filters'
+
     Object
         .keys(filters)
         .forEach(key => {
@@ -26,23 +29,32 @@ function getQsFilters(filters: QueryKind): QueryStringItem[] {
                                 .keys(queryItem[fieldName])
                                 .map(operator => `[${operator}]=${queryItem[fieldName][operator]}`)
                                 .join('')
-                            queryStrings.push(`filters[${key}][${index}][${fieldName}]${filterParamsString}`)
+                            queryStrings.push(`${filtersLabel}[${key}][${index}][${fieldName}]${filterParamsString}`)
                         })
                 })
             } else {
                 Object
                     .keys(filters[key])
                     .forEach(
-                        operator => queryStrings.push(`filters[${key}][${operator}]=${filters[key][operator]}`)
+                        operator => queryStrings.push(`${filtersLabel}[${key}][${operator}]=${filters[key][operator]}`)
                     )
             }
         })
     return queryStrings
 }
 
+function getQsRelationFilters(relationFilters: RelationFilters): QueryStringItem[] {
+    return Object
+        .keys(relationFilters)
+        .map(relation => getQsFilters(relationFilters[relation], true))
+        .reduce((qsListAcc, queryItems) => {
+            return [...qsListAcc, ...queryItems]
+        }, [])
+}
+
 function getQsRelations(relations: Relations): QueryStringItem[] {
     if (Array.isArray(relations)) return relations.map((relation, index) => `relations[${index}]=${relation}`)
-    return [`relations=${relations}`]
+    return [`relations[0]=${relations}`]
 }
 
 function getQsFields(fields: Fields): QueryStringItem[] {
@@ -71,14 +83,23 @@ function getQsSort(sort: string): QueryStringItem[] {
     return [`sort=${sort}`]
 }
 
+function getQsRelationSort(relationSort: RelationSort): QueryStringItem[] {
+    return Object
+        .keys(relationSort)
+        .map(relation => `relationSort[${relation}]=${relationSort[relation]}`)
+}
+
 export default function qs(queryObject: QueryObject): QueryString {
+
     const qsObject: Record<string, QueryStringItem[]> = {
         qsFilters: queryObject.filters ? getQsFilters(queryObject.filters) : [],
         qsRelations: queryObject.relations ? getQsRelations(queryObject.relations) : [],
         qsFields: queryObject.fields ? getQsFields(queryObject.fields) : [],
         qsRelationFields: queryObject.relationFields ? getQsRelationFields(queryObject.relationFields) : [],
+        qsRelationFilters: queryObject.relationFilters ? getQsRelationFilters(queryObject.relationFilters) : [],
         qsPagination: queryObject.pagination ? getQsPagination(queryObject.pagination) : [],
-        qsSort: queryObject.sort ? getQsSort(queryObject.sort) : []
+        qsSort: queryObject.sort ? getQsSort(queryObject.sort) : [],
+        qsRelationSort: queryObject.relationSort ? getQsRelationSort(queryObject.relationSort) : []
     }
     const qsList = Object
         .keys(qsObject)

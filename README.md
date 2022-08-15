@@ -41,7 +41,17 @@ const queryObject1: QueryObject = {
     relationFields: {
         Skill: ['title']
     },
-    sort: 'asc:createdAt'
+    sort: 'asc:createdAt',
+    relationFilters: {
+        Skill: {
+            title: {
+                startsWith: 'HT'
+            }
+        }
+    },
+    relationSort: {
+        Skill: 'asc:title'
+    }
 }
 
 const queryObject2: QueryObject = {
@@ -70,9 +80,9 @@ const queryObject2: QueryObject = {
     }
 }
 
-console.log('test-1: ', qs(queryObject1))
-// ?filters[title][startsWith]=front&relations[0]=Skill&relations[1]=User&fields[0]=code&fields[1]=title&relationFields[Skill][0]=title&sort=asc:createdAt
-console.log('test-2: ', qs(queryObject2))
-// ?filters[or][0][title][startsWith]=front&filters[or][1][code][endsWith]=front&relations=User&fields[0]=code&fields[1]=title&relationFields[User][0]=lastName&page=2&pageSize=5
+console.log(qs(queryObject1))
+// ?filters[title][startsWith]=front&relations[0]=Skill&relations[1]=User&fields[0]=code&fields[1]=title&relationFields[Skill][0]=title&relationFilters[title][startsWith]=HT&sort=asc:createdAt&relationSort[Skill]=asc:title
+console.log(qs(queryObject2))
+// ?filters[or][0][title][startsWith]=front&filters[or][1][code][endsWith]=front&relations[0]=User&fields[0]=code&fields[1]=title&relationFields[User][0]=lastName&page=2&pageSize=5
 ```
 
